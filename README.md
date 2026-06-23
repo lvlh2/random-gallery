@@ -1,56 +1,90 @@
-# Welcome to your Expo app 👋
+# Random Gallery
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A random-browsing photo gallery app for Android, built with [Expo](https://expo.dev) (SDK 56).
 
-## Get started
+Shuffle through your photo collection in random order. Import folders without copying files — images are read directly from their source locations via Android's Storage Access Framework.
 
-1. Install dependencies
+## Features
 
-   ```bash
-   npm install
-   ```
+- **Random browsing** — photos displayed in a shuffled grid; order changes every visit
+- **Folder import via SAF** — pick folders from your device; no files are copied
+- **Selective browsing** — choose which folders to include via checkboxes
+- **Dark theme** — always-dark UI
+- **Full-screen viewer** — pinch to zoom, swipe horizontally to navigate, swipe up to delete
+- **Native UI** — uses `@expo/ui` for Material Design components
 
-2. Start the app
+## Screenshots
 
-   ```bash
-   npx expo start
-   ```
+| Random Grid | Full-screen Viewer | Folder Management |
+|:-----------:|:------------------:|:-----------------:|
+| *(add screenshots)* | *(add screenshots)* | *(add screenshots)* |
 
-In the output, you'll find options to open the app in a
+## Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- [Expo SDK 56](https://docs.expo.dev/versions/v56.0.0/)
+- [Expo Router](https://docs.expo.dev/router/introduction/) (file-based routing)
+- [`@expo/ui`](https://docs.expo.dev/versions/latest/sdk/ui/) (native Material / SwiftUI components)
+- [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/) (animations)
+- [React Native Gesture Handler](https://docs.swmansion.com/react-native-gesture-handler/) (gestures)
+- [expo-file-system](https://docs.expo.dev/versions/latest/sdk/filesystem/) (SAF folder access)
+- [expo-image](https://docs.expo.dev/versions/latest/sdk/image/) (optimized image loading)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Getting Started
 
-## Get a fresh project
+### Prerequisites
 
-When you're ready, run:
+- Node.js 20+
+- An Android device or emulator (API 30+)
+
+### Install
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Run
 
-### Other setup steps
+```bash
+# Start the dev server
+npx expo start
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+# Or directly launch on Android
+npx expo start --android
+```
 
-## Learn more
+Scan the QR code with [Expo Go](https://expo.dev/go) on your phone, or connect an Android emulator.
 
-To learn more about developing your project with Expo, look at the following resources:
+### Build APK
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx eas-cli build --platform android --profile preview
+```
 
-## Join the community
+Requires an [Expo account](https://expo.dev/signup). The build runs in the cloud and produces a downloadable APK.
 
-Join our community of developers creating universal apps.
+## Project Structure
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```
+src/
+  app/
+    _layout.tsx           # Root Stack navigator
+    index.tsx             # Redirect / → /random
+    viewer.tsx            # Full-screen viewer (modal)
+    (tabs)/
+      _layout.tsx         # NativeTabs (Random + Folders)
+      random.tsx          # Shuffled image grid
+      folders.tsx         # Folder import & management
+  services/
+    folders.ts            # Folder CRUD (AsyncStorage)
+    random.ts             # Fisher-Yates shuffle
+    viewer-state.ts       # Grid ↔ Viewer state bridge
+    image-utils.ts        # Image file filtering
+  hooks/
+    use-theme.ts          # Dark theme hook
+  constants/
+    theme.ts              # Colors, spacing, fonts
+```
+
+## License
+
+MIT
