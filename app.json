@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "random-gallery",
+    "name": "Random Gallery",
     "slug": "random-gallery",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,10 +12,9 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/images/image.png",
+        "monochromeImage": "./assets/images/image.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.lvlh2.randomgallery"
