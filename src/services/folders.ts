@@ -1,7 +1,7 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 
-const STORAGE_KEY = '@random-gallery/folders';
+const STORAGE_KEY = "@random-gallery/folders";
 
 export interface FolderImport {
   id: string;
@@ -29,7 +29,10 @@ export async function saveFolders(folders: FolderImport[]): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(folders));
 }
 
-export async function addFolder(uri: string, name: string): Promise<FolderImport[]> {
+export async function addFolder(
+  uri: string,
+  name: string,
+): Promise<FolderImport[]> {
   const folders = await getFolders();
   const newFolder: FolderImport = {
     id: generateId(),
@@ -52,7 +55,7 @@ export async function removeFolder(id: string): Promise<FolderImport[]> {
 export async function toggleFolder(id: string): Promise<FolderImport[]> {
   const folders = await getFolders();
   const updated = folders.map((f) =>
-    f.id === id ? { ...f, enabled: !f.enabled } : f
+    f.id === id ? { ...f, enabled: !f.enabled } : f,
   );
   await saveFolders(updated);
   return updated;

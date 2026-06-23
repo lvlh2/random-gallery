@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -6,45 +6,44 @@ import {
   StyleSheet,
   View,
   ViewToken,
-} from 'react-native';
-import { Image } from 'expo-image';
-import { router, useLocalSearchParams } from 'expo-router';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+} from "react-native";
+import { Image } from "expo-image";
+import { router, useLocalSearchParams } from "expo-router";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-} from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+} from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Spacing } from "@/constants/theme";
 import {
   getViewerImages,
   setViewerImages,
   clearViewerImages,
-} from '@/services/viewer-state';
-import type { ViewerImage } from '@/services/viewer-state';
+} from "@/services/viewer-state";
+import type { ViewerImage } from "@/services/viewer-state";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 export default function ViewerScreen() {
   const { index } = useLocalSearchParams<{ index: string }>();
   const initialImages = getViewerImages();
-  const initialIndex = parseInt(index || '0', 10) || 0;
+  const initialIndex = parseInt(index || "0", 10) || 0;
 
   const [images, setImages] = useState<ViewerImage[]>(initialImages);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showConfirm, setShowConfirm] = useState(false);
   const flatListRef = useRef<FlatList<ViewerImage>>(null);
 
-
   // Guard: navigate back (deferred after render to avoid setState-during-render error)
   useEffect(() => {
     if (initialImages.length === 0 || initialIndex >= initialImages.length) {
-      router.replace('/random');
+      router.replace("/random");
     }
   }, [initialImages, initialIndex]);
 
@@ -54,7 +53,7 @@ export default function ViewerScreen() {
 
     // Use legacy FileSystem for SAF-compatible deletion
     try {
-      const FileSystem = require('expo-file-system/legacy');
+      const FileSystem = require("expo-file-system/legacy");
       FileSystem.deleteAsync(target.uri, { idempotent: true }).catch(() => {});
     } catch {
       // Best-effort deletion; silently ignore failures
@@ -67,7 +66,7 @@ export default function ViewerScreen() {
       setImages([]);
       setViewerImages([]);
       clearViewerImages();
-      router.replace('/random');
+      router.replace("/random");
       return;
     }
 
@@ -94,7 +93,7 @@ export default function ViewerScreen() {
       if (viewableItems.length > 0 && viewableItems[0].index != null) {
         setCurrentIndex(viewableItems[0].index);
       }
-    }
+    },
   ).current;
 
   const viewabilityConfig = useRef({
@@ -119,13 +118,9 @@ export default function ViewerScreen() {
         viewabilityConfig={viewabilityConfig}
         keyExtractor={(item) => item.uri}
         renderItem={({ item }) => (
-          <ImageItem
-            item={item}
-            onDeleteRequest={() => setShowConfirm(true)}
-          />
+          <ImageItem item={item} onDeleteRequest={() => setShowConfirm(true)} />
         )}
       />
-
 
       {/* Delete confirmation overlay */}
       {showConfirm && (
@@ -138,13 +133,15 @@ export default function ViewerScreen() {
             <ThemedText
               themeColor="textSecondary"
               type="small"
-              style={styles.confirmDesc}>
+              style={styles.confirmDesc}
+            >
               This permanently deletes the file. This action cannot be undone.
             </ThemedText>
             <View style={styles.confirmActions}>
               <Pressable
                 onPress={() => setShowConfirm(false)}
-                style={styles.cancelButton}>
+                style={styles.cancelButton}
+              >
                 <ThemedText>Cancel</ThemedText>
               </Pressable>
               <Pressable
@@ -152,7 +149,8 @@ export default function ViewerScreen() {
                   setShowConfirm(false);
                   handleDelete();
                 }}
-                style={styles.deleteButton}>
+                style={styles.deleteButton}
+              >
                 <ThemedText style={styles.deleteText}>Delete</ThemedText>
               </Pressable>
             </View>
@@ -236,19 +234,19 @@ function ImageItem({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   imagePage: {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   animatedContainer: {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   fullImage: {
     width: SCREEN_WIDTH,
@@ -256,16 +254,16 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(0,0,0,0.75)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   confirmBox: {
     marginHorizontal: Spacing.five,
     padding: Spacing.five,
     borderRadius: 16,
-    backgroundColor: '#1c1c1e',
-    alignItems: 'center',
+    backgroundColor: "#1c1c1e",
+    alignItems: "center",
     gap: Spacing.two,
     width: SCREEN_WIDTH * 0.78,
   },
@@ -276,32 +274,32 @@ const styles = StyleSheet.create({
   },
   confirmTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   confirmDesc: {
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: Spacing.one,
     lineHeight: 20,
   },
   confirmActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: Spacing.two,
     marginTop: Spacing.two,
-    alignSelf: 'stretch',
+    alignSelf: "stretch",
   },
   cancelButton: {
     flex: 1,
     paddingVertical: Spacing.three,
     borderRadius: 10,
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.1)",
   },
   deleteButton: {
     flex: 1,
     paddingVertical: Spacing.three,
     borderRadius: 10,
-    alignItems: 'center',
-    backgroundColor: '#d32f2f',
+    alignItems: "center",
+    backgroundColor: "#d32f2f",
   },
-  deleteText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  deleteText: { color: "#fff", fontWeight: "700", fontSize: 16 },
 });

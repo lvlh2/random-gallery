@@ -1,8 +1,8 @@
-import { Stack, DarkTheme, ThemeProvider } from 'expo-router';
-import { StyleSheet } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Stack, DarkTheme, ThemeProvider } from "expo-router";
+import { StyleSheet } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { AnimatedSplashOverlay } from "@/components/animated-icon";
 
 export default function RootLayout() {
   return (
@@ -14,8 +14,8 @@ export default function RootLayout() {
           <Stack.Screen
             name="viewer"
             options={{
-              presentation: 'fullScreenModal',
-              animation: 'slide_from_right',
+              presentation: "fullScreenModal",
+              animation: "slide_from_right",
             }}
           />
         </Stack>

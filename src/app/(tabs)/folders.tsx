@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -7,21 +7,21 @@ import {
   ScrollView,
   StyleSheet,
   View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from 'expo-router';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "expo-router";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
-import { Colors } from '@/constants/theme';
-import * as FolderService from '@/services/folders';
-import type { FolderImport } from '@/services/folders';
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { BottomTabInset, Spacing } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
+import * as FolderService from "@/services/folders";
+import type { FolderImport } from "@/services/folders";
 
 // SAF is Android-only.
 let StorageAccessFramework: any = null;
-if (Platform.OS === 'android') {
-  const SAF = require('expo-file-system/legacy');
+if (Platform.OS === "android") {
+  const SAF = require("expo-file-system/legacy");
   StorageAccessFramework = SAF.StorageAccessFramework;
 }
 
@@ -34,12 +34,12 @@ export default function FoldersScreen() {
       FolderService.getFolders()
         .then(setFolders)
         .finally(() => setLoading(false));
-    }, [])
+    }, []),
   );
 
   async function handleImport() {
     if (!StorageAccessFramework) {
-      Alert.alert('Not Supported', 'Folder import requires Android.');
+      Alert.alert("Not Supported", "Folder import requires Android.");
       return;
     }
     try {
@@ -48,14 +48,14 @@ export default function FoldersScreen() {
       if (result.granted) {
         const uri = result.directoryUri;
         // Extract folder name: e.g. "primary:DCIM/Camera" → "Camera"
-        const rawLast = uri.split('/').pop() || '';
+        const rawLast = uri.split("/").pop() || "";
         const decoded = decodeURIComponent(rawLast);
-        const name = decoded.split(/[/:]/).filter(Boolean).pop() || 'Folder';
+        const name = decoded.split(/[/:]/).filter(Boolean).pop() || "Folder";
         const updated = await FolderService.addFolder(uri, name);
         setFolders(updated);
       }
     } catch (error: any) {
-      Alert.alert('Error', `Could not import folder: ${error.message}`);
+      Alert.alert("Error", `Could not import folder: ${error.message}`);
     }
   }
 
@@ -66,19 +66,19 @@ export default function FoldersScreen() {
 
   function handleRemove(folder: FolderImport) {
     Alert.alert(
-      'Remove Folder',
+      "Remove Folder",
       `Stop importing "${folder.name}"?\nSource files will NOT be deleted.`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: "Cancel", style: "cancel" },
         {
-          text: 'Remove',
-          style: 'destructive',
+          text: "Remove",
+          style: "destructive",
           onPress: async () => {
             const updated = await FolderService.removeFolder(folder.id);
             setFolders(updated);
           },
         },
-      ]
+      ],
     );
   }
 
@@ -91,7 +91,7 @@ export default function FoldersScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       {/* Header */}
       <ThemedView style={styles.header}>
         <ThemedText type="subtitle">Folders</ThemedText>
@@ -113,20 +113,24 @@ export default function FoldersScreen() {
       ) : (
         <ScrollView
           style={styles.list}
-          contentContainerStyle={styles.listContent}>
+          contentContainerStyle={styles.listContent}
+        >
           {folders.map((folder) => (
             <ThemedView
               key={folder.id}
               type="backgroundElement"
-              style={styles.folderItem}>
+              style={styles.folderItem}
+            >
               <Pressable
                 onPress={() => handleToggle(folder.id)}
-                style={styles.checkboxRow}>
+                style={styles.checkboxRow}
+              >
                 <View
                   style={[
                     styles.checkbox,
                     folder.enabled && styles.checkboxChecked,
-                  ]}>
+                  ]}
+                >
                   {folder.enabled && (
                     <ThemedText style={styles.checkmark}>✓</ThemedText>
                   )}
@@ -137,7 +141,8 @@ export default function FoldersScreen() {
               </Pressable>
               <Pressable
                 onPress={() => handleRemove(folder)}
-                style={styles.removeButton}>
+                style={styles.removeButton}
+              >
                 <ThemedText themeColor="textSecondary" type="small">
                   Remove
                 </ThemedText>
@@ -169,8 +174,8 @@ const styles = StyleSheet.create({
   center: {
     flex: 1,
     backgroundColor: Colors.dark.background,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     paddingHorizontal: Spacing.four,
@@ -185,15 +190,15 @@ const styles = StyleSheet.create({
   },
   empty: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     gap: Spacing.one,
     paddingHorizontal: Spacing.four,
   },
   emptyTitle: { fontSize: 16 },
   folderItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
     borderRadius: Spacing.three,
@@ -201,8 +206,8 @@ const styles = StyleSheet.create({
   },
   checkboxRow: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.two,
   },
   checkbox: {
@@ -211,8 +216,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     borderWidth: 2,
     borderColor: Colors.dark.textSecondary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   checkboxChecked: {
     backgroundColor: Colors.dark.text,
@@ -221,7 +226,7 @@ const styles = StyleSheet.create({
   checkmark: {
     fontSize: 14,
     color: Colors.dark.background,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   folderName: { flex: 1 },
   removeButton: {
@@ -244,11 +249,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.text,
     paddingVertical: Spacing.three,
     borderRadius: Spacing.three,
-    alignItems: 'center',
+    alignItems: "center",
   },
   importButtonText: {
     color: Colors.dark.background,
-    fontWeight: '600',
+    fontWeight: "600",
     fontSize: 16,
   },
 });
