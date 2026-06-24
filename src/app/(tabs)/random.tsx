@@ -3,10 +3,8 @@ import {
   ActivityIndicator,
   Dimensions,
   FlatList,
-  Platform,
   Pressable,
   StyleSheet,
-  View,
 } from "react-native";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -21,14 +19,7 @@ import { fisherYatesShuffle } from "@/services/random";
 import { getFolders } from "@/services/folders";
 import { setViewerImages } from "@/services/viewer-state";
 import type { ViewerImage } from "@/services/viewer-state";
-import { isImageFile } from "@/services/image-utils";
-
-// SAF is Android-only.
-let StorageAccessFramework: any = null;
-if (Platform.OS === "android") {
-  const SAF = require("expo-file-system/legacy");
-  StorageAccessFramework = SAF.StorageAccessFramework;
-}
+import { getCachedImages, loadImages } from "@/services/media-loader";
 
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -47,7 +38,6 @@ export default function RandomScreen() {
     useCallback(() => {
       let cancelled = false;
       async function load() {
-        setLoading(true);
         setError(null);
         try {
           const folders = await getFolders();
@@ -57,24 +47,19 @@ export default function RandomScreen() {
               setImages([]);
               setViewerImages([]);
             }
+            setLoading(false);
             return;
           }
 
-          const allImages: ViewerImage[] = [];
-          for (const folder of enabled) {
-            try {
-              if (!StorageAccessFramework) continue;
-              const files = await StorageAccessFramework.readDirectoryAsync(
-                folder.uri,
-              );
-              for (const uri of files) {
-                if (isImageFile(uri)) {
-                  allImages.push({ uri, name: uri.split("/").pop() || uri });
-                }
-              }
-            } catch {
-              // Skip folders whose SAF permissions have expired
-            }
+          // Use cached results if available; otherwise do a full load
+          const cached = getCachedImages();
+          let allImages: ViewerImage[];
+          if (cached !== null) {
+            allImages = cached;
+            setLoading(false); // instant — no I/O
+          } else {
+            allImages = await loadImages(folders);
+            if (!cancelled) setLoading(false);
           }
 
           if (!cancelled) {
@@ -84,9 +69,10 @@ export default function RandomScreen() {
             gridKey.current++;
           }
         } catch (e: any) {
-          if (!cancelled) setError(e.message);
-        } finally {
-          if (!cancelled) setLoading(false);
+          if (!cancelled) {
+            setError(e.message);
+            setLoading(false);
+          }
         }
       }
       load();

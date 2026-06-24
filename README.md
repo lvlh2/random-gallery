@@ -10,6 +10,10 @@
 </p>
 
 <p align="center">
+  <sub>⚠️ Built with vibe coding — expect quirks.</sub>
+</p>
+
+<p align="center">
   <a href="#download">Download APK</a> ·
   <a href="#features">Features</a> ·
   <a href="#how-it-works">How It Works</a>

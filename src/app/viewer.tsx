@@ -40,7 +40,7 @@ export default function ViewerScreen() {
   const [showConfirm, setShowConfirm] = useState(false);
   const flatListRef = useRef<FlatList<ViewerImage>>(null);
 
-  // Guard: navigate back (deferred after render to avoid setState-during-render error)
+  // Guard: navigate back (deferred after render)
   useEffect(() => {
     if (initialImages.length === 0 || initialIndex >= initialImages.length) {
       router.replace("/random");
@@ -51,12 +51,11 @@ export default function ViewerScreen() {
     const target = images[currentIndex];
     if (!target) return;
 
-    // Use legacy FileSystem for SAF-compatible deletion
     try {
       const FileSystem = require("expo-file-system/legacy");
       FileSystem.deleteAsync(target.uri, { idempotent: true }).catch(() => {});
     } catch {
-      // Best-effort deletion; silently ignore failures
+      // Best-effort deletion
     }
 
     const updated = [...images];
@@ -70,8 +69,6 @@ export default function ViewerScreen() {
       return;
     }
 
-    // Determine new index — stay on currentIndex to show next image,
-    // unless we deleted the last image, then go to previous.
     const newIndex =
       currentIndex >= updated.length ? updated.length - 1 : currentIndex;
 
@@ -79,7 +76,6 @@ export default function ViewerScreen() {
     setViewerImages(updated);
     setCurrentIndex(newIndex);
 
-    // Scroll FlatList to the new index
     requestAnimationFrame(() => {
       flatListRef.current?.scrollToIndex({
         index: newIndex,
@@ -109,6 +105,8 @@ export default function ViewerScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         initialScrollIndex={initialIndex}
+        initialNumToRender={1}
+        maxToRenderPerBatch={1}
         getItemLayout={(_, idx) => ({
           length: SCREEN_WIDTH,
           offset: SCREEN_WIDTH * idx,
@@ -122,7 +120,6 @@ export default function ViewerScreen() {
         )}
       />
 
-      {/* Delete confirmation overlay */}
       {showConfirm && (
         <View style={styles.overlay}>
           <View style={styles.confirmBox}>
@@ -218,10 +215,12 @@ function ImageItem({
         <Animated.View style={[styles.animatedContainer, animatedStyle]}>
           <Image
             source={{ uri: item.uri }}
+            placeholder={{ uri: item.uri }}
             style={styles.fullImage}
             contentFit="contain"
             cachePolicy="memory-disk"
             recyclingKey={item.uri}
+            transition={300}
           />
         </Animated.View>
       </GestureDetector>
