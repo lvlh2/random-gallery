@@ -215,12 +215,10 @@ function ImageItem({
         <Animated.View style={[styles.animatedContainer, animatedStyle]}>
           <Image
             source={{ uri: item.uri }}
-            placeholder={{ uri: item.uri }}
             style={styles.fullImage}
             contentFit="contain"
             cachePolicy="memory-disk"
             recyclingKey={item.uri}
-            transition={300}
           />
         </Animated.View>
       </GestureDetector>

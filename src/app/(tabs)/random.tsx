@@ -1,10 +1,11 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
   FlatList,
   Pressable,
   StyleSheet,
+  View,
 } from "react-native";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,7 +13,6 @@ import { useFocusEffect, router } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
 import { BottomTabInset, Spacing } from "@/constants/theme";
 import { Colors } from "@/constants/theme";
 import { fisherYatesShuffle } from "@/services/random";
@@ -23,10 +23,17 @@ import { getCachedImages, loadImages } from "@/services/media-loader";
 
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
 const ITEM_GAP = 2;
 const PADDING = 2;
 const ITEM_SIZE =
   (SCREEN_WIDTH - PADDING * 2 - ITEM_GAP * (NUM_COLUMNS - 1)) / NUM_COLUMNS;
+const ROWS_PER_PAGE = Math.max(
+  4,
+  Math.floor((SCREEN_HEIGHT - BottomTabInset) / (ITEM_SIZE + ITEM_GAP)),
+);
+const PAGE_SIZE = NUM_COLUMNS * ROWS_PER_PAGE;
+const PAGE_HEIGHT = ROWS_PER_PAGE * (ITEM_SIZE + ITEM_GAP) - ITEM_GAP;
 
 export default function RandomScreen() {
   const [images, setImages] = useState<ViewerImage[]>([]);
@@ -51,12 +58,11 @@ export default function RandomScreen() {
             return;
           }
 
-          // Use cached results if available; otherwise do a full load
           const cached = getCachedImages();
           let allImages: ViewerImage[];
           if (cached !== null) {
             allImages = cached;
-            setLoading(false); // instant — no I/O
+            setLoading(false);
           } else {
             allImages = await loadImages(folders);
             if (!cancelled) setLoading(false);
@@ -82,26 +88,14 @@ export default function RandomScreen() {
     }, []),
   );
 
-  function renderItem({ item, index }: { item: ViewerImage; index: number }) {
-    return (
-      <Pressable
-        onPress={() => router.push(`/viewer?index=${index}`)}
-        style={({ pressed }) => [
-          styles.gridItem,
-          pressed && styles.gridItemPressed,
-        ]}
-      >
-        <Image
-          source={{ uri: item.uri }}
-          style={styles.thumbnail}
-          contentFit="cover"
-          cachePolicy="memory-disk"
-          recyclingKey={item.uri}
-          transition={200}
-        />
-      </Pressable>
-    );
-  }
+  // Split shuffled images into vertical pages (each = one screen of thumbnail grid)
+  const pages = useMemo(() => {
+    const result: ViewerImage[][] = [];
+    for (let i = 0; i < images.length; i += PAGE_SIZE) {
+      result.push(images.slice(i, i + PAGE_SIZE));
+    }
+    return result;
+  }, [images]);
 
   // --- loading ---
   if (loading) {
@@ -144,27 +138,47 @@ export default function RandomScreen() {
     );
   }
 
-  // --- grid ---
+  // --- paged vertical grid ---
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <FlatList
         key={gridKey.current}
-        data={images}
-        keyExtractor={(item) => item.uri}
-        renderItem={renderItem}
-        numColumns={NUM_COLUMNS}
-        windowSize={7}
-        maxToRenderPerBatch={21}
-        initialNumToRender={21}
-        removeClippedSubviews
+        data={pages}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.gridContent}
-        columnWrapperStyle={styles.columnWrapper}
-        getItemLayout={(_, index) => ({
-          length: ITEM_SIZE,
-          offset: ITEM_SIZE * Math.floor(index / NUM_COLUMNS),
-          index,
+        windowSize={3}
+        initialNumToRender={2}
+        maxToRenderPerBatch={1}
+        getItemLayout={(_, idx) => ({
+          length: PAGE_HEIGHT,
+          offset: PAGE_HEIGHT * idx,
+          index: idx,
         })}
+        keyExtractor={(_, idx) => `p${idx}`}
+        renderItem={({ item: pageImages, index: pi }) => (
+          <View style={[styles.page, { height: PAGE_HEIGHT }]}>
+            {pageImages.map((img, i) => {
+              const globalIndex = pi * PAGE_SIZE + i;
+              return (
+                <Pressable
+                  key={img.uri}
+                  onPress={() => router.push(`/viewer?index=${globalIndex}`)}
+                  style={({ pressed }) => [
+                    styles.gridItem,
+                    pressed && styles.gridItemPressed,
+                  ]}
+                >
+                  <Image
+                    source={{ uri: img.uri }}
+                    style={styles.thumbnail}
+                    contentFit="cover"
+                    cachePolicy="memory-disk"
+                    recyclingKey={img.uri}
+                  />
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
       />
     </SafeAreaView>
   );
@@ -197,11 +211,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
   },
-  gridContent: {
+  page: {
+    width: SCREEN_WIDTH,
     paddingHorizontal: PADDING,
-    paddingBottom: BottomTabInset + Spacing.two,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: ITEM_GAP,
+    alignContent: "flex-start",
   },
-  columnWrapper: { gap: ITEM_GAP, marginBottom: ITEM_GAP },
   gridItem: {
     width: ITEM_SIZE,
     height: ITEM_SIZE,
