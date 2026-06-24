@@ -147,13 +147,6 @@ export default function RandomScreen() {
   // --- grid ---
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      {/* Count header */}
-      <ThemedView style={styles.header}>
-        <ThemedText themeColor="textSecondary" type="small">
-          {images.length} {images.length === 1 ? "image" : "images"}
-        </ThemedText>
-      </ThemedView>
-
       <FlatList
         key={gridKey.current}
         data={images}
@@ -187,11 +180,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: Spacing.five,
-  },
-  header: {
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    alignItems: "center",
   },
   emptyContent: {
     alignItems: "center",
