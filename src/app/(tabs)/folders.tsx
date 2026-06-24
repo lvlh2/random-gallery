@@ -17,6 +17,7 @@ import { BottomTabInset, Spacing } from "@/constants/theme";
 import { Colors } from "@/constants/theme";
 import * as FolderService from "@/services/folders";
 import type { FolderImport } from "@/services/folders";
+import { invalidateCache } from "@/services/media-loader";
 
 // SAF is Android-only.
 let StorageAccessFramework: any = null;
@@ -52,6 +53,7 @@ export default function FoldersScreen() {
         const decoded = decodeURIComponent(rawLast);
         const name = decoded.split(/[/:]/).filter(Boolean).pop() || "Folder";
         const updated = await FolderService.addFolder(uri, name);
+        invalidateCache();
         setFolders(updated);
       }
     } catch (error: any) {
@@ -61,6 +63,7 @@ export default function FoldersScreen() {
 
   async function handleToggle(id: string) {
     const updated = await FolderService.toggleFolder(id);
+    invalidateCache();
     setFolders(updated);
   }
 
@@ -75,6 +78,7 @@ export default function FoldersScreen() {
           style: "destructive",
           onPress: async () => {
             const updated = await FolderService.removeFolder(folder.id);
+            invalidateCache();
             setFolders(updated);
           },
         },

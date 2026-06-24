@@ -34,6 +34,11 @@ export function getCachedImages(): ViewerImage[] | null {
   return _cachedImages;
 }
 
+/** Invalidate cache — call after folder list changes. */
+export function invalidateCache(): void {
+  _cachedImages = null;
+}
+
 /** Load all images — uses MediaStore when possible, SAF as fallback. */
 export async function loadImages(
   folders: FolderImport[],
