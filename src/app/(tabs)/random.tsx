@@ -81,6 +81,8 @@ export default function RandomScreen() {
             const allImages = await loadImages(folders);
             if (cancelled) return;
             const shuffled = fisherYatesShuffle(allImages);
+            updateCachedImages(shuffled);
+            imagesRef.current = shuffled;
             setImages(shuffled);
             setViewerImages(shuffled);
             gridKey.current++;
@@ -103,6 +105,7 @@ export default function RandomScreen() {
 
   function handleRefresh() {
     const shuffled = fisherYatesShuffle(images);
+    imagesRef.current = shuffled;
     setImages(shuffled);
     setViewerImages(shuffled);
     updateCachedImages(shuffled);

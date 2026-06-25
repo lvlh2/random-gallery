@@ -65,6 +65,7 @@ export default function ViewerScreen() {
     if (updated.length === 0) {
       setImages([]);
       setViewerImages([]);
+      updateCachedImages([]);
       clearViewerImages();
       router.back();
       return;
