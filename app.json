@@ -2,7 +2,7 @@
   "expo": {
     "name": "Random Gallery",
     "slug": "random-gallery",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/images/image.png",
     "scheme": "randomgallery",
