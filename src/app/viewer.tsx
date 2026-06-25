@@ -27,6 +27,7 @@ import {
   clearViewerImages,
 } from "@/services/viewer-state";
 import type { ViewerImage } from "@/services/viewer-state";
+import { updateCachedImages } from "@/services/media-loader";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -74,6 +75,7 @@ export default function ViewerScreen() {
 
     setImages(updated);
     setViewerImages(updated);
+    updateCachedImages(updated);
     setCurrentIndex(newIndex);
 
     requestAnimationFrame(() => {

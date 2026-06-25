@@ -46,11 +46,20 @@ export default function RandomScreen() {
   const [error, setError] = useState<string | null>(null);
   const gridKey = useRef(0);
   const loadedOnce = useRef(initCache !== null);
+  const imagesRef = useRef(initCache);
 
   useFocusEffect(
     useCallback(() => {
-      // Cache valid & already loaded — skip
-      if (loadedOnce.current && getCachedImages() !== null) return;
+      // Sync state from cache (may have been updated by viewer deletions)
+      const cached = getCachedImages();
+      if (cached !== null && cached !== imagesRef.current) {
+        imagesRef.current = cached;
+        setImages(cached);
+        setViewerImages(cached);
+      }
+
+      // Cache valid & already loaded — skip full reload
+      if (loadedOnce.current && cached !== null) return;
 
       let cancelled = false;
       async function load() {
