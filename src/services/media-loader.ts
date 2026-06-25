@@ -39,6 +39,11 @@ export function invalidateCache(): void {
   _cachedImages = null;
 }
 
+/** Update cache in-place after shuffle — keeps order across tab switches. */
+export function updateCachedImages(images: ViewerImage[]): void {
+  _cachedImages = images;
+}
+
 /** Load all images — uses MediaStore when possible, SAF as fallback. */
 export async function loadImages(
   folders: FolderImport[],

@@ -159,7 +159,8 @@ export default function FoldersScreen() {
       {/* Tips */}
       <ThemedView style={styles.tipBox}>
         <ThemedText themeColor="textSecondary" type="small">
-          💡 Tip: Swipe up on an image to delete it.
+          💡 Tip: In the full-screen viewer, swipe up to delete and swipe down
+          to exit.
         </ThemedText>
       </ThemedView>
 

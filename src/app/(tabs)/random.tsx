@@ -19,7 +19,11 @@ import { fisherYatesShuffle } from "@/services/random";
 import { getFolders } from "@/services/folders";
 import { setViewerImages } from "@/services/viewer-state";
 import type { ViewerImage } from "@/services/viewer-state";
-import { getCachedImages, loadImages } from "@/services/media-loader";
+import {
+  getCachedImages,
+  loadImages,
+  updateCachedImages,
+} from "@/services/media-loader";
 
 const NUM_COLUMNS = 3;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -36,13 +40,18 @@ const PAGE_SIZE = NUM_COLUMNS * ROWS_PER_PAGE;
 const PAGE_HEIGHT = ROWS_PER_PAGE * (ITEM_SIZE + ITEM_GAP) - ITEM_GAP;
 
 export default function RandomScreen() {
-  const [images, setImages] = useState<ViewerImage[]>([]);
-  const [loading, setLoading] = useState(true);
+  const initCache = getCachedImages();
+  const [images, setImages] = useState<ViewerImage[]>(initCache ?? []);
+  const [loading, setLoading] = useState(initCache === null);
   const [error, setError] = useState<string | null>(null);
   const gridKey = useRef(0);
+  const loadedOnce = useRef(initCache !== null);
 
   useFocusEffect(
     useCallback(() => {
+      // Cache valid & already loaded — skip
+      if (loadedOnce.current && getCachedImages() !== null) return;
+
       let cancelled = false;
       async function load() {
         setError(null);
@@ -58,22 +67,17 @@ export default function RandomScreen() {
             return;
           }
 
-          const cached = getCachedImages();
-          let allImages: ViewerImage[];
-          if (cached !== null) {
-            allImages = cached;
-            setLoading(false);
-          } else {
-            allImages = await loadImages(folders);
-            if (!cancelled) setLoading(false);
-          }
-
-          if (!cancelled) {
+          // Need fresh load
+          if (getCachedImages() === null) {
+            const allImages = await loadImages(folders);
+            if (cancelled) return;
             const shuffled = fisherYatesShuffle(allImages);
             setImages(shuffled);
             setViewerImages(shuffled);
             gridKey.current++;
           }
+          loadedOnce.current = true;
+          setLoading(false);
         } catch (e: any) {
           if (!cancelled) {
             setError(e.message);
@@ -87,6 +91,14 @@ export default function RandomScreen() {
       };
     }, []),
   );
+
+  function handleRefresh() {
+    const shuffled = fisherYatesShuffle(images);
+    setImages(shuffled);
+    setViewerImages(shuffled);
+    updateCachedImages(shuffled);
+    gridKey.current++;
+  }
 
   // Split shuffled images into vertical pages (each = one screen of thumbnail grid)
   const pages = useMemo(() => {
@@ -180,6 +192,14 @@ export default function RandomScreen() {
           </View>
         )}
       />
+
+      {/* Shuffle FAB */}
+      <Pressable
+        onPress={handleRefresh}
+        style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
+      >
+        <ThemedText style={styles.fabText}>↻</ThemedText>
+      </Pressable>
     </SafeAreaView>
   );
 }
@@ -228,4 +248,23 @@ const styles = StyleSheet.create({
   },
   gridItemPressed: { opacity: 0.8 },
   thumbnail: { width: "100%", height: "100%" },
+  fab: {
+    position: "absolute",
+    bottom: BottomTabInset + Spacing.three,
+    right: Spacing.four,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: Colors.dark.backgroundElement,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 4,
+  },
+  fabPressed: { opacity: 0.7 },
+  fabText: {
+    fontSize: 30,
+    paddingBottom: 8,
+    color: Colors.dark.text,
+    textAlign: "center",
+  },
 });

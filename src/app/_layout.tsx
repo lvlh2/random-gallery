@@ -15,7 +15,8 @@ export default function RootLayout() {
             name="viewer"
             options={{
               presentation: "fullScreenModal",
-              animation: "slide_from_right",
+              animation: "none",
+              contentStyle: { backgroundColor: "#000" },
             }}
           />
         </Stack>

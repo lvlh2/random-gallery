@@ -43,7 +43,7 @@ export default function ViewerScreen() {
   // Guard: navigate back (deferred after render)
   useEffect(() => {
     if (initialImages.length === 0 || initialIndex >= initialImages.length) {
-      router.replace("/random");
+      router.back();
     }
   }, [initialImages, initialIndex]);
 
@@ -65,7 +65,7 @@ export default function ViewerScreen() {
       setImages([]);
       setViewerImages([]);
       clearViewerImages();
-      router.replace("/random");
+      router.back();
       return;
     }
 
@@ -116,7 +116,11 @@ export default function ViewerScreen() {
         viewabilityConfig={viewabilityConfig}
         keyExtractor={(item) => item.uri}
         renderItem={({ item }) => (
-          <ImageItem item={item} onDeleteRequest={() => setShowConfirm(true)} />
+          <ImageItem
+            item={item}
+            onDeleteRequest={() => setShowConfirm(true)}
+            onExitRequest={() => router.back()}
+          />
         )}
       />
 
@@ -163,9 +167,11 @@ export default function ViewerScreen() {
 function ImageItem({
   item,
   onDeleteRequest,
+  onExitRequest,
 }: {
   item: ViewerImage;
   onDeleteRequest: () => void;
+  onExitRequest: () => void;
 }) {
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
@@ -192,13 +198,13 @@ function ImageItem({
     .failOffsetX([-20, 20])
     .maxPointers(1)
     .onUpdate((e) => {
-      if (e.translationY < 0) {
-        translateY.value = e.translationY;
-      }
+      translateY.value = e.translationY;
     })
     .onEnd((e) => {
       if (e.translationY < -120) {
         runOnJS(onDeleteRequest)();
+      } else if (e.translationY > 120) {
+        runOnJS(onExitRequest)();
       }
       translateY.value = withSpring(0);
     });

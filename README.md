@@ -29,22 +29,23 @@ Download the APK, install it on your Android device, and start browsing.
 
 ## Features
 
-|                           |                                                                        |
-| ------------------------- | ---------------------------------------------------------------------- |
-| 🔀 **Random shuffle**     | Photos displayed in random order — changes every time you open the app |
-| 📁 **Folder import**      | Pick folders from your device via SAF; no files are ever copied        |
-| ✅ **Selective browsing** | Choose which folders appear in the random grid with checkboxes         |
-| 🔍 **Full-screen viewer** | Pinch to zoom, swipe left/right to navigate, swipe up to delete        |
+|                           |                                                                          |
+| ------------------------- | ------------------------------------------------------------------------ |
+| 🔀 **Random shuffle**     | All photos shuffled once; tap ↻ to reshuffle                             |
+| 📁 **Folder import**      | Pick folders via Android SAF                                             |
+| ✅ **Selective browsing** | Toggle folders on/off with checkboxes                                    |
+| 🔍 **Full-screen viewer** | Pinch to zoom, swipe to navigate, swipe up to delete, swipe down to exit |
 
 ## How It Works
 
 1. Open the **Folders** tab and tap "Import Folder" to pick a photo folder
 2. Use checkboxes to choose which folders to include
 3. Switch to the **Random** tab — your photos appear in shuffled order
-4. Tap any thumbnail to view it full-screen
-5. Swipe up on an image to delete it permanently (with confirmation)
+4. Tap ↻ in the bottom-right to reshuffle at any time
+5. Tap any thumbnail to view it full-screen
+6. Swipe up to delete, swipe down to exit the viewer
 
-Images are read directly from their source folders. The app never copies or moves your files.
+Images are read directly from their source folders via MediaStore and SAF. The app never copies or moves your files.
 
 ## Screenshots
 
