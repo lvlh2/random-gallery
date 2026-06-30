@@ -9,7 +9,12 @@ export default function RootLayout() {
     <GestureHandlerRootView style={styles.root}>
       <ThemeProvider value={DarkTheme}>
         <AnimatedSplashOverlay />
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: "#000" },
+          }}
+        >
           <Stack.Screen name="(tabs)" />
           <Stack.Screen
             name="viewer"

@@ -41,10 +41,10 @@ Then: `cd android && gradlew assembleRelease`
 
 **Current values — UPDATE THESE when bumping:**
 
-| Field        | Value    |
-| ------------ | -------- |
-| `version`    | `1.0.7`  |
-| `versionCode` | `8`      |
+| Field         | Value   |
+| ------------- | ------- |
+| `version`     | `1.0.7` |
+| `versionCode` | `8`     |
 
 #### When `expo prebuild --clean` IS needed
 
@@ -114,14 +114,14 @@ src/app/
 
 Images are shuffled once via Fisher-Yates, then split into pages of `ROWS_PER_PAGE × 3` (dynamically computed from screen height). A vertical `FlatList` with `getItemLayout` renders each page as a wrapped row of thumbnails. `windowSize={3}` limits off-screen rendering.
 
-### Viewer — gesture composition
+### Viewer — gallery with pinch-to-zoom
 
-Each image page uses `Gesture.Simultaneous(pinchGesture, panGesture)`. The pan gesture has two modes, switched by React state (`isZoomed`) communicated from `ImageItem` → parent via `onZoomChange`:
+Uses `react-native-zoom-toolkit`'s `<Gallery>` component, which wraps a FlatList with built-in Reanimated + RNGH gesture handling for pinch-to-zoom, pan, and double-tap. Replaces the previous hand-rolled gesture composition.
 
-- **Normal mode** (`isZoomed=false`): `failOffsetX([-20,20])` + `activeOffsetY([-50,50])` — horizontal swipes fall through to the FlatList for page switching; vertical swipes trigger delete (up >120px) or back (down >120px). FlatList `scrollEnabled={true}`.
-- **Zoomed mode** (`isZoomed=true`): No axis restrictions — free pan in both directions with clamping to image bounds. Pan translations accumulate across multiple swipes via `savedTranslateX`/`savedTranslateY`. FlatList `scrollEnabled={false}` so horizontal input is not stolen by page switching.
-
-The gesture object is rebuilt via `useMemo([isZoomed])` when zoom state changes; pinch zoom out (scale < 1) resets all translations and springs back to identity.
+- **Horizontal swiping**: Gallery handles page switching via internal FlatList.
+- **Pinch-to-zoom**: Gallery handles zoom in/out with `scaleMode="bounce"` and `pinchMode="clamp"` — no custom gesture code needed.
+- **Vertical swipe delete/back**: Gallery's `onVerticalPull` worklet callback fires with `{ translateY, released }`. Only active when `scale === 1` (Gallery guarantees this). `translateY < -120` shows delete confirmation; `translateY > 120` calls `router.back()` to exit the viewer (with `exitingRef` guard + `router.replace("/random")` fallback).
+- **Navigation**: Stack root layout uses `contentStyle: { backgroundColor: "#000" }` to prevent white flash during transitions.
 
 ### Folder import (Android only)
 
