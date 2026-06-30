@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   FlatList,
@@ -39,6 +39,7 @@ export default function ViewerScreen() {
   const [images, setImages] = useState<ViewerImage[]>(initialImages);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
   const flatListRef = useRef<FlatList<ViewerImage>>(null);
 
   // Guard: navigate back (deferred after render)
@@ -106,6 +107,7 @@ export default function ViewerScreen() {
         data={images}
         horizontal
         pagingEnabled
+        scrollEnabled={!isZoomed}
         showsHorizontalScrollIndicator={false}
         initialScrollIndex={initialIndex}
         initialNumToRender={1}
@@ -121,8 +123,10 @@ export default function ViewerScreen() {
         renderItem={({ item }) => (
           <ImageItem
             item={item}
+            isZoomed={isZoomed}
             onDeleteRequest={() => setShowConfirm(true)}
             onExitRequest={() => router.back()}
+            onZoomChange={setIsZoomed}
           />
         )}
       />
@@ -169,53 +173,107 @@ export default function ViewerScreen() {
 
 function ImageItem({
   item,
+  isZoomed,
   onDeleteRequest,
   onExitRequest,
+  onZoomChange,
 }: {
   item: ViewerImage;
+  isZoomed: boolean;
   onDeleteRequest: () => void;
   onExitRequest: () => void;
+  onZoomChange: (zoomed: boolean) => void;
 }) {
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
+  const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
+  // Accumulated offsets so each pan continues from where the last one left off
+  const savedTranslateX = useSharedValue(0);
+  const savedTranslateY = useSharedValue(0);
 
-  const pinchGesture = Gesture.Pinch()
-    .onStart(() => {
-      savedScale.value = scale.value;
-    })
-    .onUpdate((e) => {
-      scale.value = Math.max(0.5, savedScale.value * e.scale);
-    })
-    .onEnd(() => {
-      if (scale.value < 1) {
-        scale.value = withSpring(1);
-        savedScale.value = 1;
-      } else {
-        savedScale.value = scale.value;
-      }
-    });
+  const pinchGesture = useMemo(
+    () =>
+      Gesture.Pinch()
+        .onStart(() => {
+          savedScale.value = scale.value;
+        })
+        .onUpdate((e) => {
+          scale.value = Math.max(0.5, savedScale.value * e.scale);
+        })
+        .onEnd(() => {
+          if (scale.value < 1) {
+            scale.value = withSpring(1);
+            savedScale.value = 1;
+            translateX.value = withSpring(0);
+            translateY.value = withSpring(0);
+            savedTranslateX.value = 0;
+            savedTranslateY.value = 0;
+            runOnJS(onZoomChange)(false);
+          } else {
+            savedScale.value = scale.value;
+            runOnJS(onZoomChange)(true);
+          }
+        }),
+    // Shared values are stable refs, callbacks captured at creation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
-  const panGesture = Gesture.Pan()
-    .activeOffsetY([-50, 50])
-    .failOffsetX([-20, 20])
-    .maxPointers(1)
-    .onUpdate((e) => {
-      translateY.value = e.translationY;
-    })
-    .onEnd((e) => {
-      if (e.translationY < -120) {
-        runOnJS(onDeleteRequest)();
-      } else if (e.translationY > 120) {
-        runOnJS(onExitRequest)();
-      }
-      translateY.value = withSpring(0);
-    });
+  const panGesture = useMemo(() => {
+    if (isZoomed) {
+      // Zoomed: free pan in both axes to explore the enlarged image.
+      return Gesture.Pan()
+        .maxPointers(1)
+        .onStart(() => {
+          savedTranslateX.value = translateX.value;
+          savedTranslateY.value = translateY.value;
+        })
+        .onUpdate((e) => {
+          const extraW = ((savedScale.value - 1) * SCREEN_WIDTH) / 2;
+          const extraH = ((savedScale.value - 1) * SCREEN_HEIGHT) / 2;
+          translateX.value = Math.min(
+            extraW,
+            Math.max(-extraW, savedTranslateX.value + e.translationX),
+          );
+          translateY.value = Math.min(
+            extraH,
+            Math.max(-extraH, savedTranslateY.value + e.translationY),
+          );
+        });
+    }
 
-  const composedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
+    // Normal: vertical only (delete / exit). Horizontal → FlatList.
+    return Gesture.Pan()
+      .activeOffsetY([-50, 50])
+      .failOffsetX([-20, 20])
+      .maxPointers(1)
+      .onUpdate((e) => {
+        translateY.value = e.translationY;
+      })
+      .onEnd((e) => {
+        if (e.translationY < -120) {
+          runOnJS(onDeleteRequest)();
+        } else if (e.translationY > 120) {
+          runOnJS(onExitRequest)();
+        }
+        translateY.value = withSpring(0);
+      });
+    // Re-created only when zoom state changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isZoomed]);
+
+  const composedGesture = useMemo(
+    () => Gesture.Simultaneous(pinchGesture, panGesture),
+    [pinchGesture, panGesture],
+  );
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }, { scale: scale.value }],
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: scale.value },
+    ],
   }));
 
   return (

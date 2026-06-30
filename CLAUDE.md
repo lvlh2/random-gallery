@@ -93,7 +93,12 @@ Images are shuffled once via Fisher-Yates, then split into pages of `ROWS_PER_PA
 
 ### Viewer — gesture composition
 
-Each image page uses `Gesture.Simultaneous(pinchGesture, panGesture)`. Horizontal swiping is handled by the FlatList's `pagingEnabled`. The pan gesture detects vertical swipes: up >120px triggers delete confirmation, down >120px calls `router.back()`.
+Each image page uses `Gesture.Simultaneous(pinchGesture, panGesture)`. The pan gesture has two modes, switched by React state (`isZoomed`) communicated from `ImageItem` → parent via `onZoomChange`:
+
+- **Normal mode** (`isZoomed=false`): `failOffsetX([-20,20])` + `activeOffsetY([-50,50])` — horizontal swipes fall through to the FlatList for page switching; vertical swipes trigger delete (up >120px) or back (down >120px). FlatList `scrollEnabled={true}`.
+- **Zoomed mode** (`isZoomed=true`): No axis restrictions — free pan in both directions with clamping to image bounds. Pan translations accumulate across multiple swipes via `savedTranslateX`/`savedTranslateY`. FlatList `scrollEnabled={false}` so horizontal input is not stolen by page switching.
+
+The gesture object is rebuilt via `useMemo([isZoomed])` when zoom state changes; pinch zoom out (scale < 1) resets all translations and springs back to identity.
 
 ### Folder import (Android only)
 
