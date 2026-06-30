@@ -43,8 +43,8 @@ Then: `cd android && gradlew assembleRelease`
 
 | Field         | Value   |
 | ------------- | ------- |
-| `version`     | `1.0.8` |
-| `versionCode` | `9`     |
+| `version`     | `1.0.9`  |
+| `versionCode` | `10`     |
 
 #### When `expo prebuild --clean` IS needed
 
