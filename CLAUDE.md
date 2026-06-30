@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Always
 
 - Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before writing any code.
+- Run `npx prettier . --check` and `npx expo lint` before committing. Use `npx prettier . -w` to auto-fix formatting.
 
 ## Build & Run
 
@@ -32,6 +33,26 @@ Version bumps require editing BOTH `app.json` and `android/app/build.gradle` (`v
 npx eas-cli build --platform android --profile preview
 ```
 
+### Lint & Format
+
+```bash
+npx expo lint           # ESLint check (0 errors required)
+npx prettier . --check  # format check
+npx prettier . -w       # auto-format all files
+```
+
+## CI/CD
+
+GitHub Actions (`.github/workflows/check.yml`) runs on every push and PR to `master`:
+
+| Job              | Command            | Blocking |
+| ---------------- | ------------------ | -------- |
+| TypeScript Check | `npx tsc --noEmit` | ✅ Yes   |
+| Lint             | `npx expo lint`    | ✅ Yes   |
+| Tests            | `npm test`         | ✅ Yes   |
+
+The workflow fails if any job fails — fix before merging.
+
 ## Architecture
 
 ### Route structure (Expo Router file-based)
@@ -46,6 +67,15 @@ src/app/
     random.tsx             # Paged thumbnail grid (3 cols × ~5 rows per screen)
     folders.tsx            # SAF folder import, checkbox toggle, remove
 ```
+
+### Key config files
+
+| File                 | Purpose                                                                                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tsconfig.json`      | TypeScript config — test files and jest.setup.ts are excluded since `@types/jest` types conflict with TS 6.0                                                      |
+| `eslint.config.js`   | ESLint flat config — extends `eslint-config-expo`, ignores test files, downgrades pre-existing `react-hooks/refs` and `set-state-in-effect` from error to warning |
+| `jest.setup.ts`      | Global Jest mocks for all expo/RN modules, sets `Platform.OS = "android"`                                                                                         |
+| `src/types/css.d.ts` | Type declarations for `*.css` and `*.module.css` imports (needed for `tsc` on Linux)                                                                              |
 
 ### Data flow — three-layer cache system
 
