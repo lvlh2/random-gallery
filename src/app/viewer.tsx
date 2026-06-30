@@ -5,7 +5,10 @@ import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { runOnJS } from "react-native-reanimated";
 import { Gallery } from "react-native-zoom-toolkit";
-import type { VerticalPullOptions } from "react-native-zoom-toolkit";
+import type {
+  GalleryRefType,
+  VerticalPullOptions,
+} from "react-native-zoom-toolkit";
 
 import { ThemedText } from "@/components/themed-text";
 import { Spacing } from "@/constants/theme";
@@ -28,6 +31,7 @@ export default function ViewerScreen() {
   const [images, setImages] = useState<ViewerImage[]>(initialImages);
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [showConfirm, setShowConfirm] = useState(false);
+  const galleryRef = useRef<GalleryRefType>(null);
 
   // Guard: navigate back if data is invalid
   useEffect(() => {
@@ -51,16 +55,26 @@ export default function ViewerScreen() {
     updated.splice(currentIndex, 1);
 
     if (updated.length === 0) {
-      setImages([]);
       setViewerImages([]);
       updateCachedImages([]);
       clearViewerImages();
-      router.replace("/random");
+      try {
+        router.back();
+      } catch {
+        router.replace("/random");
+      }
       return;
     }
 
     const newIndex =
       currentIndex >= updated.length ? updated.length - 1 : currentIndex;
+
+    // Deleting the last item in the list: move Gallery to the previous
+    // image programmatically before React updates the data. Without this,
+    // Gallery's internal FlatList gets stuck when the tail item is removed.
+    if (currentIndex === images.length - 1) {
+      galleryRef.current?.setIndex(newIndex);
+    }
 
     setImages(updated);
     setViewerImages(updated);
@@ -118,6 +132,7 @@ export default function ViewerScreen() {
   return (
     <SafeAreaView style={styles.container} edges={[]}>
       <Gallery
+        ref={galleryRef}
         data={images}
         renderItem={renderImage}
         keyExtractor={keyExtractor}
