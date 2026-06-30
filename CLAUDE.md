@@ -15,17 +15,40 @@ npx expo start                     # dev server (scan QR with Expo Go)
 npx expo start --android           # launch on connected device/emulator
 ```
 
-### APK Build (Local)
+### APK Build (Local) — ⚠️ READ THIS FIRST ⚠️
 
-Requires JDK 17 and Android SDK at `%LOCALAPPDATA%\Android\Sdk`. The `android/` directory is generated (gitignored) and must be regenerated when dependencies change:
+**CRITICAL: `npx expo prebuild` RESETS `versionCode` to `1` in `android/app/build.gradle`!**
+Since `android/` is **gitignored**, the previous `versionCode` is **lost forever** once overwritten. Android rejects installations with a lower `versionCode` than what's already on the phone. The phone's installed `versionCode` is the only source of truth — you must know it before making changes.
+
+#### Routine build (code changes only, no new native deps)
 
 ```bash
-npx expo prebuild --clean          # regenerate android/ from app.json
 cd android && gradlew assembleRelease
-# APK output: android/app/build/outputs/apk/release/random-gallery.apk
+# APK: android/app/build/outputs/apk/release/random-gallery.apk
 ```
 
-Version bumps require editing BOTH `app.json` and `android/app/build.gradle` (`versionCode` and `versionName`).
+**Do NOT run `expo prebuild`** — it's unnecessary and destroys `versionCode`.
+
+#### Version bump (e.g. 1.0.6 → 1.0.7)
+
+Edit **THREE** values, all manually:
+
+1. `app.json`: `"version": "X.Y.Z"`
+2. `android/app/build.gradle`: `versionCode N` (integer, **MUST be higher** than previous — increment by 1 from last known)
+3. `android/app/build.gradle`: `versionName "X.Y.Z"` (string, matches app.json)
+
+Then: `cd android && gradlew assembleRelease`
+
+**Current values — UPDATE THESE when bumping:**
+
+| Field        | Value    |
+| ------------ | -------- |
+| `version`    | `1.0.7`  |
+| `versionCode` | `8`      |
+
+#### When `expo prebuild --clean` IS needed
+
+Only when native dependencies change (new expo packages, react-native version bump, etc.). After running it, you **MUST** manually restore `versionCode` in `android/app/build.gradle` before building.
 
 ### APK Build (Cloud)
 
