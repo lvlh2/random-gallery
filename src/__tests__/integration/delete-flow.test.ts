@@ -40,9 +40,7 @@ function mockAlbum(title: string, imageCount: number) {
 
 async function loadAndShuffle(folderName: string, count: number) {
   const album = mockAlbum(folderName, count);
-  MediaLibrary.getAlbumsAsync.mockResolvedValue([
-    { title: folderName, count },
-  ]);
+  MediaLibrary.getAlbumsAsync.mockResolvedValue([{ title: folderName, count }]);
   MediaLibrary.getAssetsAsync.mockResolvedValue({
     assets: album.assets,
     endCursor: "end",

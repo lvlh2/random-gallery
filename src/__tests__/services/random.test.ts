@@ -93,7 +93,11 @@ describe("fisherYatesShuffle", () => {
     ];
     const result = fisherYatesShuffle(input);
     expect(result).toHaveLength(3);
-    expect(result.map((x) => x.uri).sort()).toEqual(["a.jpg", "b.jpg", "c.jpg"]);
+    expect(result.map((x) => x.uri).sort()).toEqual([
+      "a.jpg",
+      "b.jpg",
+      "c.jpg",
+    ]);
   });
 
   // ---- Large array (performance smoke test) ----

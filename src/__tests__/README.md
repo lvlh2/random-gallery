@@ -29,17 +29,20 @@ src/__tests__/
 ## What Each Suite Covers
 
 ### `image-utils.test.ts`
+
 - All 8 supported image extensions (case-insensitive)
 - 12 unsupported extensions
 - Edge cases: no extension, empty string, dotfiles, multiple dots, long URIs
 
 ### `random.test.ts`
+
 - Length preservation, element preservation, no mutation of input
 - Empty/single/two-element arrays
 - Statistical distribution test (6000 iterations, ±50% tolerance)
 - Works with strings, objects, and 10K-element arrays
 
 ### `folders.test.ts`
+
 - `getFolders`: empty storage, valid data, malformed JSON, non-array values
 - `saveFolders`: persistence, overwrite, empty array
 - `addFolder`: new folder (auto-enabled, ID generated), appending to existing
@@ -47,6 +50,7 @@ src/__tests__/
 - `toggleFolder`: true→false, false→true, non-mutation of other folders, immutability
 
 ### `media-loader.test.ts`
+
 - `getCachedImages`: starts null
 - `invalidateCache`: clears populated cache, no-op on null
 - `updateCachedImages`: stores/overwrites/empties
@@ -60,12 +64,15 @@ src/__tests__/
 - Ref comparison for staleness detection
 
 ### `viewer-state.test.ts`
+
 - Round-trip set/get, initial empty, overwrite, clear
 - Large arrays (5000 items)
 - Reference semantics (set/get return the same reference — documenting current behavior)
 
 ### `cache-consistency.test.ts` (integration)
+
 **Simulates real app orchestration across all three cache layers:**
+
 1. **Initial load**: loadImages → shuffle → update all layers → verify agreement
 2. **Delete image**: remove from viewer → update layers → verify consistency
 3. **Delete last image**: all layers cleared
@@ -74,7 +81,9 @@ src/__tests__/
 6. **Ref-based staleness**: deleting changes ref so grid detects the update
 
 ### `delete-flow.test.ts` (integration)
+
 **End-to-end deletion lifecycle:**
+
 - Delete middle image (ref comparison, array update)
 - Delete first image (index adjustment)
 - Delete last image (index adjustment)
@@ -84,6 +93,7 @@ src/__tests__/
 - No-op when no mutations (grid skips reload)
 
 ### Component tests
+
 - `themed-text.test.tsx`: all 8 type variants, themeColor prop, style merging, empty/numeric/nested children
 - `themed-view.test.tsx`: rendering, children, type prop, style prop, nesting
 
@@ -101,6 +111,7 @@ src/__tests__/
 4. Follow the existing patterns for mock setup and `beforeEach` cleanup
 
 **Important for new tests:**
+
 - `render()` from `@testing-library/react-native` v14 is **async** — always `await render(...)`
 - Use `screen.getByXxx()` queries (not destructured from `render`)
 - For services with module-level state, use the public invalidate/reset APIs in `beforeEach`

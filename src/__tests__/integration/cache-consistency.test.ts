@@ -138,9 +138,7 @@ describe("Cache consistency (three-layer)", () => {
     mediaLoader.updateCachedImages(firstShuffle);
     viewerState.setViewerImages(firstShuffle);
 
-    const secondShuffle = fisherYatesShuffle(
-      mediaLoader.getCachedImages()!,
-    );
+    const secondShuffle = fisherYatesShuffle(mediaLoader.getCachedImages()!);
     mediaLoader.updateCachedImages(secondShuffle);
     viewerState.setViewerImages(secondShuffle);
 

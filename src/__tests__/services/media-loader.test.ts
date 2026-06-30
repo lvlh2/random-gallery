@@ -132,9 +132,7 @@ describe("loadImages", () => {
     const result = await mediaLoader.loadImages(folders);
 
     expect(result).toHaveLength(10);
-    expect(result[0].uri).toBe(
-      "content://media/external/images/0/img_0.jpg",
-    );
+    expect(result[0].uri).toBe("content://media/external/images/0/img_0.jpg");
     expect(mediaLoader.getCachedImages()).toEqual(result);
   });
 
@@ -158,7 +156,9 @@ describe("loadImages", () => {
   });
 
   test("falls back to SAF when MediaStore.getAlbumsAsync throws", async () => {
-    MediaLibrary.getAlbumsAsync.mockRejectedValue(new Error("Permission denied"));
+    MediaLibrary.getAlbumsAsync.mockRejectedValue(
+      new Error("Permission denied"),
+    );
     SAF.readDirectoryAsync.mockResolvedValue([
       "content://test/folder-0/img.jpg",
     ]);

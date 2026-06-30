@@ -84,6 +84,7 @@ npm run test:coverage # with coverage report
 116 tests in 9 suites covering services, integration flows, and components. See `src/__tests__/README.md` for full documentation.
 
 Key test files:
+
 - `src/__tests__/services/` — unit tests for all 5 services (image-utils, random, folders, media-loader, viewer-state)
 - `src/__tests__/integration/` — three-layer cache consistency & delete lifecycle
 - `src/__tests__/components/` — themed-text and themed-view rendering

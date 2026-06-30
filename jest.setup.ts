@@ -15,7 +15,9 @@ jest.mock("@react-native-async-storage/async-storage", () => {
   return {
     __esModule: true,
     default: {
-      getItem: jest.fn((key: string) => Promise.resolve(store.get(key) ?? null)),
+      getItem: jest.fn((key: string) =>
+        Promise.resolve(store.get(key) ?? null),
+      ),
       setItem: jest.fn((key: string, value: string) => {
         store.set(key, value);
         return Promise.resolve();
@@ -41,8 +43,13 @@ jest.mock("react-native-gesture-handler", () => {
   const View = require("react-native").View;
   return {
     Gesture: {
-      Simultaneous: jest.fn((...gestures: any[]) => ({ simultaneous: gestures })),
-      Pinch: jest.fn(() => ({ pinch: true, enabled: jest.fn().mockReturnThis() })),
+      Simultaneous: jest.fn((...gestures: any[]) => ({
+        simultaneous: gestures,
+      })),
+      Pinch: jest.fn(() => ({
+        pinch: true,
+        enabled: jest.fn().mockReturnThis(),
+      })),
       Pan: jest.fn(() => ({
         pan: true,
         enabled: jest.fn().mockReturnThis(),
@@ -127,7 +134,12 @@ jest.mock("expo-file-system/legacy", () => ({
 jest.mock("expo-media-library/legacy", () => ({
   getAlbumsAsync: jest.fn(() => Promise.resolve([])),
   getAssetsAsync: jest.fn(() =>
-    Promise.resolve({ assets: [], endCursor: "0", hasNextPage: false, totalCount: 0 }),
+    Promise.resolve({
+      assets: [],
+      endCursor: "0",
+      hasNextPage: false,
+      totalCount: 0,
+    }),
   ),
 }));
 
@@ -187,6 +199,7 @@ console.warn = (...args: any[]) => {
   // Filter out Reanimated "no worklet" warnings
   if (typeof args[0] === "string" && args[0].includes("worklet")) return;
   // Filter out act() warnings from React Testing Library (we handle these)
-  if (typeof args[0] === "string" && args[0].includes("not wrapped in act")) return;
+  if (typeof args[0] === "string" && args[0].includes("not wrapped in act"))
+    return;
   originalWarn.call(console, ...args);
 };

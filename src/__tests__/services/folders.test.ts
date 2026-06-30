@@ -86,7 +86,10 @@ describe("saveFolders", () => {
   });
 
   test("overwrites existing folders", async () => {
-    store.set("@random-gallery/folders", JSON.stringify([makeFolder({ id: "old" })]));
+    store.set(
+      "@random-gallery/folders",
+      JSON.stringify([makeFolder({ id: "old" })]),
+    );
     await saveFolders([makeFolder({ id: "new" })]);
 
     const stored = JSON.parse(store.get("@random-gallery/folders")!);
